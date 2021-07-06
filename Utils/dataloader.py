@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import torch
 import cv2
 import os
@@ -7,7 +6,9 @@ from torch.utils.data import Dataset
 import random
 import numpy as np
 """
-本函数主要实现数据加载，
+主要功能：
+主要实现数据加载
+
 数据集格式如
     data/
         数据集1/
@@ -22,6 +23,7 @@ import numpy as np
             train/
                 类别1/
                 类别2/
+                
 仅需要调用：
 get_dataloader(data_type,data_usage,batch_size=16,suffle=True,need_cvtBGR2Gray=False)
 例如：
@@ -32,7 +34,7 @@ class ISBI_Loader(Dataset):
     def __init__(self, data_type,data_usage,need_cvtBGR2Gray=False):
         # 初始化函数，读取所有data_path下的图片
         self.need_cvtBGR2Gray=need_cvtBGR2Gray
-        self.data_path = '../data/'
+        self.data_path = 'D:/Project/Dataset/'
         self.classes = glob.glob(os.path.join(self.data_path, data_type+'/'+data_usage+'/*'))
         self.num_class = len(self.classes)
         print(data_usage,'数据集类别数:',str(self.num_class))
