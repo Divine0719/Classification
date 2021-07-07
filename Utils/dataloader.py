@@ -34,11 +34,12 @@ class ISBI_Loader(Dataset):
     def __init__(self, data_type,data_usage,need_cvtBGR2Gray=False):
         # 初始化函数，读取所有data_path下的图片
         self.need_cvtBGR2Gray=need_cvtBGR2Gray
+        self.data_usage=data_usage
         self.data_path = 'D:/Project/Dataset/'
         self.classes = glob.glob(os.path.join(self.data_path, data_type+'/'+data_usage+'/*'))
         self.num_class = len(self.classes)
         print(data_usage,'数据集类别数:',str(self.num_class))
-        self.imgs_path = glob.glob(os.path.join(self.data_path, data_type+'/train/*/*.jpg'))
+        self.imgs_path = glob.glob(os.path.join(self.data_path, data_type+'/'+data_usage+'/*/*'))
         print(data_usage,'数据集各类别图片总数：',str(len(self.imgs_path)))
 
     def augment(self, image, flipCode):
@@ -61,6 +62,7 @@ class ISBI_Loader(Dataset):
         image_path = self.imgs_path[index]
         # 读取训练图片和标签图片
         image = cv2.imread(image_path)
+        image=image*(1/255.0)
         # 必须将尺寸转为正方形，避免因此在flip过程中产生错误
         image = cv2.resize(image, (224, 224))
         #图片显示
@@ -74,9 +76,10 @@ class ISBI_Loader(Dataset):
             # opencv读入的数据格式为HWC，将其改为CHW
             image = image.reshape(3, image.shape[0], image.shape[1])
         # 随机进行数据增强，为2时不做处理
-        flipCode = random.choice([-1, 0, 1, 2])
-        if flipCode != 2:  # 确保image和label使用同一个flipcode
-            image = self.augment(image, flipCode)
+        if self.data_usage =='train':#仅对训练集进行数据增广
+            flipCode = random.choice([-1, 0, 1, 2])
+            if flipCode != 2:  # 确保image和label使用同一个flipcode
+                image = self.augment(image, flipCode)
         for class_idx in range(len(self.classes)):
             if self.classes[class_idx] in image_path:
                 label=self.get_onehot(class_idx,self.num_class)
@@ -86,14 +89,14 @@ class ISBI_Loader(Dataset):
         # 返回训练集大小
         return len(self.imgs_path)
 
-def get_dataloader(data_type,data_usage,batch_size=16,suffle=True,need_cvtBGR2Gray=False):
+def get_dataloader(data_type,data_usage,batch_size=16,suffle=True,need_cvtBGR2Gray=True):
     isbi_dataset = ISBI_Loader(data_type,data_usage,need_cvtBGR2Gray=need_cvtBGR2Gray)
     data_loader = torch.utils.data.DataLoader(dataset=isbi_dataset,
                                                batch_size=batch_size,
                                                shuffle=suffle)
-    for image, label in data_loader:
-        print(label)
-        break
+    # for image, label in data_loader:
+    #     print(label)
+    #     break
     return data_loader
 
 if __name__ == "__main__":
