@@ -40,7 +40,7 @@ def do_predict(num_classes, data_type, model_type, model_index, epoch, batch_siz
     #########################################################################################
     ckpt_path='./SaveFolder/' + data_type +'/' + model_name + '/Weights'
     ckpt_file = ckpt_path+'/model_epoch_'+str(epoch)+'.ckpt'
-    ckpt2pth(model,ckpt_file)
+    ckpt2pth(model,ckpt_file)#从ckpt转成pth再使用，避免出错
     predictor = Predictor(model, model_path=ckpt_file.replace('ckpt','pth'))
     predictor.loop(test_loader)
 
